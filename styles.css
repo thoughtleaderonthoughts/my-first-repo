@@ -1,0 +1,27 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1em;
+    background-color: #f0f8ff;
+}
+
+h1 {
+    text-align: center;
+}
+
+.search {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1em;
+}
+
+#city-input {
+    padding: 0.5em;
+    margin-right: 0.5em;
+}
+
+#hourly p,
+#daily p {
+    margin: 0.25em 0;
+}
