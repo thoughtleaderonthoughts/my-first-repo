@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const books = require('../stories.js');
 const model = require('../progress.js');
 test('illustrated books have all pages, accessible pictures, and questions', () => {
-  for (const [id,length] of [[9,8],[10,10],[11,12]]) {
+  for (const [id,length] of [[9,8],[10,10],[11,12],[12,10],[13,10],[14,8]]) {
     const book = books.find(b => b.id === id);
     assert.equal(book.pages.length,length);
     assert.equal(book.illustrations.length,length);

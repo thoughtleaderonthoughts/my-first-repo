@@ -87,3 +87,9 @@ The library includes three longer original books: **Pip and the Missing Picnic**
 Every new page has its own original SVG illustration with a descriptive alternative. Filter by grade and story type. Selected pages include optional picture discussion prompts, and each new book ends with an optional comprehension question after every page has been read. Signed-in children resume at their first unfinished page and saved word. Existing stories and IDs are unchanged.
 
 For an existing installation, rerun the updated `supabase/family-profiles.sql` to support the new books and variable page counts. Story content lives in `stories.js`; database word counts must match it (checked automatically by the test suite). Illustrations are in `illustrations/` and are served locally with the app.
+
+### Classic tales
+
+The Classics shelf contains original, simplified retellings: The Tale of Peter Rabbit (10 pages, grade 1), The Three Little Pigs (10 pages, kindergarten), and The Tortoise and the Hare (8 pages, kindergarten). All 28 pages have original SVG artwork, descriptive alternative text, picture prompts and a finishing question. Retellings are labelled in the library and reader; they are not verbatim editions.
+
+Sources: Beatrix Potter’s 1902 [The Tale of Peter Rabbit](https://www.gutenberg.org/ebooks/14838), the traditional [Three Little Pigs](https://www.gutenberg.org/ebooks/18155), and [Aesop’s fables](https://www.gutenberg.org/ebooks/21). These source stories are public domain in the United States. No modern adaptations, publisher artwork, branding or Roald Dahl text is included. The Three Little Pigs has a gentle ending in which all pigs survive and the wolf leaves. For deployment elsewhere, check the source works’ local public-domain status. Rerun `supabase/family-profiles.sql` to register the new books with cloud progress validation.

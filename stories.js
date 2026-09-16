@@ -1,5 +1,182 @@
-/* Original stories. Stable IDs and published text preserve saved progress. */
+/* Stable IDs and published text preserve saved progress. */
 const books = [
+  {
+    "id": 12,
+    "title": "The Tale of Peter Rabbit",
+    "grade": "1",
+    "theme": "Classics",
+    "emoji": "🐰",
+    "deco": "✨",
+    "color": "#e1edd6",
+    "time": "8–12 min",
+    "attribution": "Simplified retelling of Beatrix Potter’s 1902 story.",
+    "source": "https://www.gutenberg.org/ebooks/14838",
+    "pages": [
+      "Peter lived under a tall tree with his mother and three sisters. One morning, Mother took her basket and went to buy bread.",
+      "Before she left, Mother warned them about the nearby garden. His sisters went to pick berries, but Peter squeezed under the garden gate.",
+      "Peter found rows of crisp green leaves. He ate a little lettuce, then a radish. Soon his tummy felt much too full.",
+      "A gardener spotted Peter beside the vegetables. Peter darted away in a hurry. His shoes slipped off as he ran between the rows.",
+      "Peter tried to squeeze through a net. A button caught, and he could not move! He wriggled out of his coat and left it behind.",
+      "Inside a little shed, Peter found a watering can. He hopped in to hide. Cold drops splashed his nose, and he gave a sneeze.",
+      "The gardener heard him! Peter jumped from the can and dashed through a window. Outside, he stopped to catch his breath beneath a bush.",
+      "Peter could not see the gate. He wandered past a pond, where a cat watched the water. Peter crept by without making a sound.",
+      "Then Peter climbed onto a wheelbarrow. From up high, he could see the gate! He waited until the gardener turned away, then ran.",
+      "Peter slipped under the gate and hurried home. Mother tucked him into bed. Next time, he thought, he would listen before setting off on an adventure."
+    ],
+    "scenes": [
+      "Peter and his mother stand beside their home under a tree.",
+      "Peter slips beneath a wooden garden gate.",
+      "Peter explores rows of lettuce and radishes.",
+      "Peter runs past vegetables, leaving two shoes behind.",
+      "Peter leaves his caught coat on a garden net.",
+      "Peter hides in a watering can inside a shed.",
+      "Peter rests beneath a bush outside the shed window.",
+      "Peter passes a quiet cat beside a pond.",
+      "Peter stands on a wheelbarrow and spots the gate.",
+      "Peter rests in a warm bed at home."
+    ],
+    "prompts": {
+      "1": "What might happen if Peter ignores the warning?",
+      "8": "How does climbing up help Peter?"
+    },
+    "question": {
+      "text": "How did Peter finally find the way out?",
+      "choices": [
+        "He followed the cat.",
+        "He climbed up and spotted the gate.",
+        "He ate another radish."
+      ],
+      "answer": 1
+    },
+    "illustrations": [
+      "illustrations/book-12-1.svg",
+      "illustrations/book-12-2.svg",
+      "illustrations/book-12-3.svg",
+      "illustrations/book-12-4.svg",
+      "illustrations/book-12-5.svg",
+      "illustrations/book-12-6.svg",
+      "illustrations/book-12-7.svg",
+      "illustrations/book-12-8.svg",
+      "illustrations/book-12-9.svg",
+      "illustrations/book-12-10.svg"
+    ]
+  },
+  {
+    "id": 13,
+    "title": "The Three Little Pigs",
+    "grade": "K",
+    "theme": "Classics",
+    "emoji": "🐷",
+    "deco": "✨",
+    "color": "#fae5d7",
+    "time": "8–12 min",
+    "attribution": "Gentle retelling of a traditional fairy tale.",
+    "source": "https://www.gutenberg.org/ebooks/18155",
+    "pages": [
+      "Three little pigs set off one day. Each pig wanted a home of their own.",
+      "The first pig made a house of straw. It was quick to build. Now I can play, said the pig.",
+      "The next pig made a house of sticks. Tap, tap, tap! Soon the little house was ready too.",
+      "The last pig chose strong bricks. One by one, the pig set them in place. A good home takes time.",
+      "A wolf came down the path. He saw the straw house and knocked. The pig kept the door shut.",
+      "The wolf took a big breath. Whoosh! The straw flew up. The first pig ran to the house of sticks.",
+      "The wolf followed the pig. He blew at the sticks. Crack! The two pigs ran to their friend with the bricks.",
+      "Come in, said the third pig. The three friends shut the door. Outside, the wolf puffed and blew as hard as he could.",
+      "The brick house stood firm. The tired wolf sat down. Then he gave up and went away down the long path.",
+      "The pigs shared a warm meal. Next time, we will build together, they said. A strong home and good friends made them feel safe."
+    ],
+    "scenes": [
+      "Three pigs set off along a winding path.",
+      "A pig builds a golden straw house.",
+      "A second pig builds a wooden stick house.",
+      "A third pig stacks bricks beside a sturdy house.",
+      "A wolf knocks on the straw house door.",
+      "Straw blows away as the first pig runs to safety.",
+      "Sticks scatter while two pigs hurry down the path.",
+      "Three pigs shelter in the brick house as the wolf blows.",
+      "The brick house stands while the wolf walks away.",
+      "Three pigs share a meal around a table."
+    ],
+    "prompts": {
+      "3": "Which house do you think will be strongest?",
+      "8": "What could the pigs do together next time?"
+    },
+    "question": {
+      "text": "Which house stayed standing?",
+      "choices": [
+        "The straw house.",
+        "The stick house.",
+        "The brick house."
+      ],
+      "answer": 2
+    },
+    "illustrations": [
+      "illustrations/book-13-1.svg",
+      "illustrations/book-13-2.svg",
+      "illustrations/book-13-3.svg",
+      "illustrations/book-13-4.svg",
+      "illustrations/book-13-5.svg",
+      "illustrations/book-13-6.svg",
+      "illustrations/book-13-7.svg",
+      "illustrations/book-13-8.svg",
+      "illustrations/book-13-9.svg",
+      "illustrations/book-13-10.svg"
+    ]
+  },
+  {
+    "id": 14,
+    "title": "The Tortoise and the Hare",
+    "grade": "K",
+    "theme": "Classics",
+    "emoji": "🐢",
+    "deco": "✨",
+    "color": "#e4eed6",
+    "time": "8–12 min",
+    "attribution": "Simplified retelling of a fable attributed to Aesop.",
+    "source": "https://www.gutenberg.org/ebooks/21",
+    "pages": [
+      "Hare could run very fast. Tortoise took small, slow steps. Hare laughed when he saw Tortoise coming down the path.",
+      "You may be fast, said Tortoise, but I will race you. Hare grinned. The friends chose a tree far down the path as the finish.",
+      "Ready, set, go! Hare sped off in a cloud of dust. Tortoise took one step, then one more. The race had begun.",
+      "Hare looked back. Tortoise was far behind. I have lots of time, thought Hare. He lay down in the shade of a tree.",
+      "Soon Hare was asleep. Tortoise kept going along the path. He did not stop to laugh. He just took the next small step.",
+      "The sun moved across the sky. Tortoise passed the sleeping Hare. The finish tree was close now, but there were still more steps to take.",
+      "Hare woke with a jump. He raced down the path. But Tortoise was already taking the last step across the finish line!",
+      "Hare caught his breath and smiled at Tortoise. You kept going, he said. Tortoise smiled too. Small steps can take you a long way."
+    ],
+    "scenes": [
+      "Hare greets Tortoise on a sunny woodland path.",
+      "Hare and Tortoise look toward a distant finish tree.",
+      "Hare bounds ahead while Tortoise begins the race.",
+      "Hare rests in the shade far ahead of Tortoise.",
+      "Hare sleeps as Tortoise steadily approaches.",
+      "Tortoise passes the sleeping Hare toward the finish tree.",
+      "Tortoise reaches the finish before the running Hare.",
+      "Hare and Tortoise smile together beside the finish line."
+    ],
+    "prompts": {
+      "3": "What could happen while Hare is asleep?",
+      "5": "What helps Tortoise keep moving?"
+    },
+    "question": {
+      "text": "Why did Tortoise win the race?",
+      "choices": [
+        "He kept taking steps while Hare slept.",
+        "He flew to the tree.",
+        "He hid the finish line."
+      ],
+      "answer": 0
+    },
+    "illustrations": [
+      "illustrations/book-14-1.svg",
+      "illustrations/book-14-2.svg",
+      "illustrations/book-14-3.svg",
+      "illustrations/book-14-4.svg",
+      "illustrations/book-14-5.svg",
+      "illustrations/book-14-6.svg",
+      "illustrations/book-14-7.svg",
+      "illustrations/book-14-8.svg"
+    ]
+  },
   {
     "id": 9,
     "title": "Pip and the Missing Picnic",

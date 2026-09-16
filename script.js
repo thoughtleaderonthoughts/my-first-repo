@@ -41,7 +41,7 @@ function renderBooks(filter = 'all') {
       cover.replaceChildren(img);
     }
     const length = document.createElement('p'); length.className = 'book-length';
-    length.textContent = `${book.theme} · ${book.pages.length} pages`;
+    length.textContent = `${book.theme} · ${book.pages.length} pages${book.attribution ? " · Retelling" : ""}`;
     card.querySelector('.book-info').appendChild(length);
     const status = document.createElement('p');
     status.className = 'book-status';
@@ -89,7 +89,7 @@ function renderPage() {
   clearTimeout(advanceTimer);
   advancing = false;
   const words = activeBook.pages[page].split(' ');
-  document.getElementById('story-grade').textContent = gradeName(activeBook.grade);
+  document.getElementById('story-grade').textContent = gradeName(activeBook.grade) + (activeBook.attribution ? ' · ' + activeBook.attribution : '');
   document.getElementById('story-title').textContent = activeBook.title;
   document.getElementById('story-picture').style.background = activeBook.color;
   const picture = document.getElementById('story-picture');
