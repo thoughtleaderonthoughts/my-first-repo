@@ -18,6 +18,8 @@ let recognition = null;
 let listening = false;
 let advancing = false;
 let availableVoices = [];
+let advanceTimer = null;
+let readerGeneration = 0;
 
 function gradeName(grade) {
   return grade === 'K' ? 'Kindergarten' : `${grade}${grade === '1' ? 'st' : 'nd'} grade`;
@@ -42,6 +44,11 @@ function renderBooks(filter = 'all') {
         openBook(book);
       }
     });
+    const status = document.createElement('p');
+    status.className = 'book-status';
+    const record = window.readingAccount?.state.books[book.id];
+    status.textContent = record?.completedAt ? '✓ Completed · Read again' : record ? 'Continue reading' : 'Start a new adventure';
+    card.querySelector('.book-info').appendChild(status);
     grid.appendChild(card);
   });
 }
@@ -54,8 +61,10 @@ document.querySelectorAll('.filter').forEach((button) => button.addEventListener
 
 function openBook(book) {
   activeBook = book;
-  page = 0;
-  wordIndex = 0;
+  const saved = ProgressModel.resume(window.readingAccount?.state.books[book.id], book);
+  page = saved.page;
+  wordIndex = saved.word;
+  readerGeneration = window.readingAccount?.state.generation || 0;
   document.getElementById('reader').classList.add('open');
   document.getElementById('reader').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -64,6 +73,7 @@ function openBook(book) {
 
 function renderPage() {
   stopListening();
+  clearTimeout(advanceTimer);
   advancing = false;
   const words = activeBook.pages[page].split(' ');
   document.getElementById('story-grade').textContent = gradeName(activeBook.grade);
@@ -122,27 +132,32 @@ function showSpeechProgress(transcript) {
 }
 
 function completeCurrentWord() {
-  if (advancing) return;
+  if (advancing || !currentWord()) return;
   advancing = true;
   renderPhonics(currentWord().length, true);
   setStatus('That’s right — every sound came together!');
-  setTimeout(advanceWord, 450);
+  advanceTimer = setTimeout(advanceWord, 450);
 }
 
 function advanceWord() {
   const words = activeBook.pages[page].split(' ');
   wordIndex += 1;
+  window.readingAccount?.record(activeBook.id, page, wordIndex, readerGeneration);
   advancing = false;
   if (wordIndex >= words.length) {
     if (page < activeBook.pages.length - 1) {
       setStatus('Page complete! Moving to the next page…');
-      setTimeout(() => {
+      advancing = true;
+      stopListening();
+      advanceTimer = setTimeout(() => {
         page += 1;
         wordIndex = 0;
         renderPage();
       }, 700);
     } else {
+      renderPageWords();
       stopListening();
+      document.querySelector('#celebration p').textContent = 'Page complete! Your bookshelf shows your saved progress.';
       document.getElementById('celebration').classList.add('show');
       document.getElementById('celebration').setAttribute('aria-hidden', 'false');
     }
@@ -203,6 +218,8 @@ function stopListening() {
   listening = false;
   if (recognition) {
     recognition.onend = null;
+    recognition.onresult = null;
+    recognition.onerror = null;
     try { recognition.stop(); } catch { /* Recognition may already be stopped. */ }
     recognition = null;
   }
@@ -212,18 +229,20 @@ function stopListening() {
 }
 
 function loadVoices() {
-  if (!('speechSynthesis' in window)) return;
-  availableVoices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith('en'));
-  const previous = voiceSelect.value;
-  voiceSelect.innerHTML = '';
-  availableVoices.forEach((voice, index) => {
-    const option = document.createElement('option');
-    option.value = String(index);
-    option.textContent = `${voice.name}${voice.localService ? ' · on device' : ''}`;
-    voiceSelect.appendChild(option);
-  });
-  if (previous && availableVoices[Number(previous)]) voiceSelect.value = previous;
-  if (!availableVoices.length) voiceSelect.innerHTML = '<option>Default browser voice</option>';
+  const note = document.getElementById('voice-note');
+  const supported = 'speechSynthesis' in window;
+  availableVoices = supported ? window.speechSynthesis.getVoices().filter((voice) => /^en([-_]|$)/i.test(voice.lang)) : [];
+  const preferred = window.readingAccount?.state.voice || '';
+  voiceSelect.replaceChildren(new Option('Default browser voice', ''));
+  for (const voice of availableVoices) {
+    voiceSelect.appendChild(new Option(`${voice.name} · ${voice.lang}${voice.localService ? ' · on device' : ' · online'}`, voice.voiceURI));
+  }
+  const found = availableVoices.some((voice) => voice.voiceURI === preferred);
+  voiceSelect.value = found ? preferred : '';
+  voiceSelect.disabled = !supported;
+  document.getElementById('preview-voice').disabled = !supported;
+  document.getElementById('voice-speed').value = String(window.readingAccount?.state.rate || 0.82);
+  note.textContent = !supported ? 'Read-aloud is not available in this browser.' : preferred && !found ? 'Your saved voice is unavailable on this device. Using the browser default; choose another voice here.' : availableVoices.length ? 'Try the different narrators to find your favorite. Voices are supplied by your device and browser.' : 'Using the browser default. More voices may appear after your device loads them.';
 }
 
 function speak(text) {
@@ -234,13 +253,17 @@ function speak(text) {
   }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = availableVoices[Number(voiceSelect.value)] || null;
-  utterance.rate = 0.82;
-  utterance.pitch = 1.02;
+  utterance.voice = availableVoices.find((voice) => voice.voiceURI === voiceSelect.value) || null;
+  utterance.lang = utterance.voice?.lang || 'en-US';
+  utterance.rate = Number(document.getElementById('voice-speed').value);
+  utterance.pitch = 1;
+  utterance.onerror = () => { document.getElementById('voice-note').textContent = 'This voice could not play. Try another voice.'; };
   window.speechSynthesis.speak(utterance);
 }
 
 function closeReader() {
+  clearTimeout(advanceTimer);
+  advancing = false;
   stopListening();
   window.speechSynthesis?.cancel();
   document.getElementById('reader').classList.remove('open');
@@ -251,7 +274,7 @@ function closeReader() {
 document.getElementById('mic-button').addEventListener('click', () => (listening ? stopListening() : startListening()));
 document.getElementById('try-word').addEventListener('click', () => speak(currentWord()));
 document.getElementById('listen-story').addEventListener('click', () => speak(activeBook.pages[page]));
-document.getElementById('preview-voice').addEventListener('click', () => speak('Hi Ari! Let’s read a story together.'));
+document.getElementById('preview-voice').addEventListener('click', () => speak(`Hi ${window.readingAccount?.state.name || 'reader'}! Let’s read a story together.`));
 document.getElementById('close-reader').addEventListener('click', closeReader);
 document.getElementById('prev-page').addEventListener('click', () => { if (page > 0) { page -= 1; wordIndex = 0; renderPage(); } });
 document.getElementById('next-page').addEventListener('click', () => { if (page < activeBook.pages.length - 1) { page += 1; wordIndex = 0; renderPage(); } });
@@ -263,6 +286,7 @@ document.getElementById('celebration-close').addEventListener('click', () => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     document.getElementById('celebration').classList.remove('show');
+    document.getElementById('celebration').setAttribute('aria-hidden', 'true');
     closeReader();
   }
 });
@@ -270,3 +294,6 @@ document.addEventListener('keydown', (event) => {
 loadVoices();
 if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadVoices;
 renderBooks();
+
+voiceSelect.addEventListener('change', () => window.readingAccount?.preferences({ voice: voiceSelect.value }));
+document.getElementById('voice-speed').addEventListener('change', (event) => window.readingAccount?.preferences({ rate: Number(event.target.value) }));

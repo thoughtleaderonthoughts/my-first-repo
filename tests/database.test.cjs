@@ -1,0 +1,42 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { readFileSync } = require('node:fs');
+const { PGlite } = require('@electric-sql/pglite');
+test('real PostgreSQL: isolation, progress, idempotency, reset, and stale devices', async () => {
+  const db = new PGlite();
+  try {
+    await db.exec(`create role anon; create role authenticated;
+      create schema auth; create table auth.users(id uuid primary key);
+      create function auth.uid() returns uuid language sql as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+      grant usage on schema auth to authenticated, anon;
+      grant execute on function auth.uid() to authenticated, anon;
+      insert into auth.users values('00000000-0000-0000-0000-000000000001'),('00000000-0000-0000-0000-000000000002');`);
+    await db.exec(readFileSync('supabase/setup.sql', 'utf8'));
+    await db.exec(`set role authenticated; set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';`);
+    const call = async (action, payload={}) => (await db.query('select public.reading_account($1,$2::jsonb) as state',[action,JSON.stringify(payload)])).rows[0].state;
+    assert.equal((await call('load')).name,'Reader');
+    let state = await call('progress',{generation:0,book:1,page:2,words:8});
+    assert.equal(state.books[1].completedAt,undefined);
+    await call('progress',{generation:0,book:1,page:0,words:8});
+    state = await call('progress',{generation:0,book:1,page:1,words:6});
+    assert.ok(state.books[1].completedAt);
+    const date = state.books[1].completedAt;
+    state = await call('progress',{generation:0,book:1,page:0,words:1});
+    assert.equal(state.books[1].pages[0],8);
+    assert.equal(state.books[1].completedAt,date);
+    await assert.rejects(call('progress',{generation:0,book:1,page:0,words:900}),/Invalid word count/);
+    await assert.rejects(db.exec(`update public.reader_accounts set state='{}';`),/permission denied/);
+    await db.exec(`set request.jwt.claim.sub='00000000-0000-0000-0000-000000000002';`);
+    assert.equal((await db.query('select * from public.reader_accounts')).rows.length,0);
+    assert.deepEqual((await call('load')).books,{});
+    await db.exec(`set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001';`);
+    await call('preferences',{generation:0,name:'Ari',voice:'voice-a',rate:1});
+    state = await call('reset');
+    assert.deepEqual(state,{name:'Reader',voice:'',rate:0.82,books:{},generation:1});
+    await assert.rejects(call('progress',{generation:0,book:1,page:0,words:8}),/reset on another device/);
+    await assert.rejects(call('preferences',{generation:0,name:'Old name'}),/reset on another device/);
+    assert.deepEqual((await call('load')).books,{});
+    await db.exec('set role anon');
+    await assert.rejects(call('load'),/permission denied/);
+  } finally { await db.close(); }
+});

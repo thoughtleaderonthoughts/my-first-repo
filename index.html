@@ -17,15 +17,15 @@
       <span>bright reads</span>
     </a>
     <div class="header-actions">
-      <div class="streak" aria-label="4 day reading streak"><span aria-hidden="true">🔥</span><strong>4</strong><span>day streak</span></div>
-      <button class="avatar" aria-label="Open Ari's profile">A</button>
+      <button id="open-account" class="account-button">My reading account</button>
+      <button class="avatar" id="open-profile" aria-label="Open reader profile">A</button>
     </div>
   </header>
 
   <main>
     <section class="hero">
       <div>
-        <p class="eyebrow">GOOD AFTERNOON, ARI!</p>
+        <p class="eyebrow" id="reader-greeting">HELLO, READER!</p>
         <h1>What will you read today?</h1>
         <p>Pick a story, read it out loud, and watch the words light up!</p>
       </div>
@@ -49,10 +49,17 @@
       <div id="book-grid" class="book-grid"></div>
     </section>
 
-    <section class="progress-card">
-      <div class="progress-icon" aria-hidden="true">🏆</div>
-      <div class="progress-copy"><p class="eyebrow">YOUR READING JOURNEY</p><h2>You're doing great!</h2><p>You've read <strong>3 books</strong> this week. Read 2 more to earn a new badge!</p></div>
-      <div class="goal"><div class="goal-label"><span>Weekly goal</span><strong>3 of 5 books</strong></div><div class="progress-track"><span></span></div></div>
+    <section class="journey" aria-labelledby="journey-title">
+      <div class="section-heading"><div><p class="eyebrow">YOUR READING JOURNEY</p><h2 id="journey-title">Every word is a step forward</h2></div><button id="refresh-progress" class="account-button">Refresh progress</button></div>
+      <p id="sync-status" role="status">Sign in to save your reading across devices.</p>
+      <div class="stats-grid">
+        <div><strong id="stat-books">0</strong><span>Books completed</span></div>
+        <div><strong id="stat-pages">0</strong><span>Pages completed</span></div>
+        <div><strong id="stat-words">0</strong><span>Words mastered</span></div>
+        <div><strong id="stat-started">0</strong><span>Books in progress</span></div>
+      </div>
+      <h3>Your bookshelf</h3><p>Read every word on every page to complete a book. Listening and skipping pages do not count.</p>
+      <div id="reading-history" class="reading-history"></div>
     </section>
   </main>
 
@@ -69,7 +76,7 @@
         <h2 id="story-title"></h2>
         <div id="story-text" class="story-text" aria-live="polite"></div>
         <div id="phonics-guide" class="phonics-guide" aria-live="polite">
-          <div class="phonics-heading"><span>Sound it out</span><small>Letters light up as Ari reads</small></div>
+          <div class="phonics-heading"><span>Sound it out</span><small>Letters light up as you read</small></div>
           <div id="phonics-parts" class="phonics-parts"></div>
         </div>
         <div id="speech-status" class="speech-status"><span class="status-dot"></span><span>Tap the microphone, then read the glowing word.</span></div>
@@ -83,12 +90,32 @@
           <select id="voice-select" aria-label="Choose a read-aloud voice"><option>Loading voices…</option></select>
           <button id="preview-voice" class="voice-preview" type="button">▶ Try</button>
         </div>
+        <p id="voice-note" class="voice-note">Choose a voice and press Try to hear it.</p>
+        <label class="speed-control" for="voice-speed">Reading speed <select id="voice-speed"><option value="0.65">Slow</option><option value="0.82" selected>Gentle</option><option value="1">Natural</option></select></label>
+        <p id="reader-save-status" role="status"></p>
         <button id="try-word" class="help-button">🔊 Hear this word</button>
       </div>
     </article>
   </div>
 
   <div id="celebration" class="celebration" aria-hidden="true"><div><span>⭐</span><h2>Wonderful reading!</h2><p>You finished the story.</p><button id="celebration-close">Back to library</button></div></div>
+  <dialog id="account-dialog" aria-labelledby="account-title">
+    <form method="dialog"><button class="dialog-close" aria-label="Close account">✕</button></form>
+    <p class="eyebrow">A LITTLE READING, EVERY DAY</p><h2 id="account-title">Your reading account</h2>
+    <p id="account-status" role="status"></p>
+    <div id="signed-out"><p>Use a parent or guardian's account to keep your reader's progress together across devices.</p><label for="account-email">Parent or guardian email</label><input id="account-email" type="email" required autocomplete="email" placeholder="you@example.com"><button id="sign-in" class="primary-button">Email me a sign-in link</button></div>
+    <div id="signed-in" hidden>
+      <form id="profile-form"><label for="reader-name">Reader's first name or nickname</label><input id="reader-name" maxlength="30" required autocomplete="off"><button class="primary-button">Save name</button></form>
+      <p>Your selected voice and reading speed are saved with your account. Available voices may differ between devices.</p>
+      <button id="sign-out" class="account-button">Sign out</button>
+      <hr><h3>Fresh start</h3><p>Reset removes all reading progress, completed books, the reader's nickname, and voice preferences across your devices. Your sign-in account stays active.</p>
+      <button id="reset-start" class="danger-button">Reset everything</button>
+      <div id="reset-confirmation" hidden><p>This cannot be undone. Reset your reading account?</p><button id="reset-confirm" class="danger-button">Yes, reset everything</button><button id="reset-cancel" class="account-button">Keep my progress</button></div>
+    </div>
+  </dialog>
+  <script src="app-config.js"></script>
+  <script src="progress.js"></script>
   <script src="script.js"></script>
+  <script src="account.js"></script>
 </body>
 </html>
