@@ -57,6 +57,7 @@ document.querySelectorAll('.filter').forEach((button) => button.addEventListener
   document.querySelector('.filter.active').classList.remove('active');
   button.classList.add('active');
   renderBooks(button.dataset.grade);
+  celebrate();
 }));
 
 function openBook(book) {
@@ -69,6 +70,7 @@ function openBook(book) {
   document.getElementById('reader').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   renderPage();
+  celebrate();
 }
 
 function renderPage() {
@@ -136,6 +138,7 @@ function completeCurrentWord() {
   advancing = true;
   renderPhonics(currentWord().length, true);
   setStatus('That’s right — every sound came together!');
+  celebrate();
   advanceTimer = setTimeout(advanceWord, 450);
 }
 
@@ -147,6 +150,7 @@ function advanceWord() {
   if (wordIndex >= words.length) {
     if (page < activeBook.pages.length - 1) {
       setStatus('Page complete! Moving to the next page…');
+      celebrate('Page complete!', true);
       advancing = true;
       stopListening();
       advanceTimer = setTimeout(() => {
@@ -156,6 +160,7 @@ function advanceWord() {
       }, 700);
     } else {
       renderPageWords();
+      celebrate('Wonderful reading!', true);
       stopListening();
       document.querySelector('#celebration p').textContent = 'Page complete! Your bookshelf shows your saved progress.';
       document.getElementById('celebration').classList.add('show');
@@ -258,6 +263,7 @@ function speak(text) {
   utterance.rate = Number(document.getElementById('voice-speed').value);
   utterance.pitch = 1;
   utterance.onerror = () => { document.getElementById('voice-note').textContent = 'This voice could not play. Try another voice.'; };
+  utterance.onstart = () => celebrate();
   window.speechSynthesis.speak(utterance);
 }
 

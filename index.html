@@ -103,16 +103,21 @@
     <form method="dialog"><button class="dialog-close" aria-label="Close account">✕</button></form>
     <p class="eyebrow">A LITTLE READING, EVERY DAY</p><h2 id="account-title">Your reading account</h2>
     <p id="account-status" role="status"></p>
-    <div id="signed-out"><p>Use a parent or guardian's account to keep your reader's progress together across devices.</p><label for="account-email">Parent or guardian email</label><input id="account-email" type="email" required autocomplete="email" placeholder="you@example.com"><button id="sign-in" class="primary-button">Email me a sign-in link</button></div>
+    <div id="signed-out"><p>Use a parent or guardian's account to keep your reader's progress together across devices.</p><label for="account-email">Parent or guardian email</label><input id="account-email" type="email" required autocomplete="email" placeholder="you@example.com"><button id="sign-in" class="primary-button" disabled>Email me a sign-in link</button></div>
     <div id="signed-in" hidden>
+      <label for="child-select">Who is reading?</label><select id="child-select"></select>
+      <form id="add-child-form"><label for="new-child-name">Add a child</label><div class="add-child-row"><input id="new-child-name" maxlength="30" required placeholder="First name or nickname"><button class="primary-button">Add child</button></div></form>
       <form id="profile-form"><label for="reader-name">Reader's first name or nickname</label><input id="reader-name" maxlength="30" required autocomplete="off"><button class="primary-button">Save name</button></form>
       <p>Your selected voice and reading speed are saved with your account. Available voices may differ between devices.</p>
       <button id="sign-out" class="account-button">Sign out</button>
-      <hr><h3>Fresh start</h3><p>Reset removes all reading progress, completed books, the reader's nickname, and voice preferences across your devices. Your sign-in account stays active.</p>
+      <hr><h3>Fresh start</h3><p>Reset removes ALL children and their reading progress, completed books, nicknames, and voice preferences across your devices. Your sign-in account stays active.</p>
       <button id="reset-start" class="danger-button">Reset everything</button>
-      <div id="reset-confirmation" hidden><p>This cannot be undone. Reset your reading account?</p><button id="reset-confirm" class="danger-button">Yes, reset everything</button><button id="reset-cancel" class="account-button">Keep my progress</button></div>
+      <div id="reset-confirmation" hidden><p>This cannot be undone. Reset every child in your family account?</p><button id="reset-confirm" class="danger-button">Yes, reset everything</button><button id="reset-cancel" class="account-button">Keep my progress</button></div>
     </div>
   </dialog>
+  <dialog id="email-success" aria-labelledby="email-success-title"><div class="success-art" aria-hidden="true">🌈 🦄 ✨</div><h2 id="email-success-title">Thanks! Check your email</h2><p id="email-success-copy"></p><p>Open the sign-in link on this device to continue. You can close this message now.</p><form method="dialog"><button class="primary-button">Got it — I'll check my email</button></form></dialog>
+  <div id="magic-toast" role="status" aria-live="polite"></div>
+  <script src="magic.js"></script>
   <script src="app-config.js"></script>
   <script src="progress.js"></script>
   <script src="script.js"></script>
