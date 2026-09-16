@@ -18,14 +18,14 @@
     </a>
     <div class="header-actions">
       <div class="streak" aria-label="4 day reading streak"><span aria-hidden="true">🔥</span><strong>4</strong><span>day streak</span></div>
-      <button class="avatar" aria-label="Open Maya's profile">M</button>
+      <button class="avatar" aria-label="Open Ari's profile">A</button>
     </div>
   </header>
 
   <main>
     <section class="hero">
       <div>
-        <p class="eyebrow">GOOD AFTERNOON, MAYA!</p>
+        <p class="eyebrow">GOOD AFTERNOON, ARI!</p>
         <h1>What will you read today?</h1>
         <p>Pick a story, read it out loud, and watch the words light up!</p>
       </div>
@@ -68,11 +68,20 @@
         <p id="story-grade" class="eyebrow"></p>
         <h2 id="story-title"></h2>
         <div id="story-text" class="story-text" aria-live="polite"></div>
+        <div id="phonics-guide" class="phonics-guide" aria-live="polite">
+          <div class="phonics-heading"><span>Sound it out</span><small>Letters light up as Ari reads</small></div>
+          <div id="phonics-parts" class="phonics-parts"></div>
+        </div>
         <div id="speech-status" class="speech-status"><span class="status-dot"></span><span>Tap the microphone, then read the glowing word.</span></div>
         <div class="reader-controls">
           <button id="prev-page" class="page-button" aria-label="Previous page">←</button>
           <button id="mic-button" class="mic-button"><span class="mic-icon">🎙️</span><span class="mic-label">Start reading</span></button>
           <button id="next-page" class="page-button" aria-label="Next page">→</button>
+        </div>
+        <div class="read-aloud-tools">
+          <label for="voice-select">Story voice</label>
+          <select id="voice-select" aria-label="Choose a read-aloud voice"><option>Loading voices…</option></select>
+          <button id="preview-voice" class="voice-preview" type="button">▶ Try</button>
         </div>
         <button id="try-word" class="help-button">🔊 Hear this word</button>
       </div>
