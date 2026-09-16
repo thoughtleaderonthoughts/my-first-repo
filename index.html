@@ -1,24 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kids Weather</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fffaf3">
+  <title>Bright Reads — Read, speak & grow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
-        <h1>Kids Weather</h1>
-        <div class="search">
-            <input id="city-input" placeholder="Enter city name" />
-            <button id="search-btn">Search</button>
-        </div>
-        <div id="shorts-advice"></div>
-        <h2>Hourly Forecast (Today)</h2>
-        <div id="hourly"></div>
-        <h2>7 Day Forecast</h2>
-        <div id="daily"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Bright Reads home">
+      <span class="brand-mark" aria-hidden="true">B<span>★</span></span>
+      <span>bright reads</span>
+    </a>
+    <div class="header-actions">
+      <div class="streak" aria-label="4 day reading streak"><span aria-hidden="true">🔥</span><strong>4</strong><span>day streak</span></div>
+      <button class="avatar" aria-label="Open Ari's profile">A</button>
     </div>
-    <script src="script.js"></script>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">GOOD AFTERNOON, ARI!</p>
+        <h1>What will you read today?</h1>
+        <p>Pick a story, read it out loud, and watch the words light up!</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="sparkle s1">✦</span><span class="sparkle s2">✦</span>
+        <div class="sun">☀</div><div class="cloud">☁</div>
+        <div class="rainbow">🌈</div>
+      </div>
+    </section>
+
+    <section class="library" aria-labelledby="library-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">EXPLORE THE LIBRARY</p><h2 id="library-title">Find your next adventure</h2></div>
+        <div class="grade-filter" role="group" aria-label="Filter by grade">
+          <button class="filter active" data-grade="all">All books</button>
+          <button class="filter" data-grade="K">Kindergarten</button>
+          <button class="filter" data-grade="1">1st grade</button>
+          <button class="filter" data-grade="2">2nd grade</button>
+        </div>
+      </div>
+      <div id="book-grid" class="book-grid"></div>
+    </section>
+
+    <section class="progress-card">
+      <div class="progress-icon" aria-hidden="true">🏆</div>
+      <div class="progress-copy"><p class="eyebrow">YOUR READING JOURNEY</p><h2>You're doing great!</h2><p>You've read <strong>3 books</strong> this week. Read 2 more to earn a new badge!</p></div>
+      <div class="goal"><div class="goal-label"><span>Weekly goal</span><strong>3 of 5 books</strong></div><div class="progress-track"><span></span></div></div>
+    </section>
+  </main>
+
+  <div id="reader" class="reader" aria-hidden="true">
+    <div class="reader-toolbar">
+      <button id="close-reader" class="back-button" aria-label="Back to library">← <span>Library</span></button>
+      <div class="reader-progress"><span id="page-label">Page 1 of 3</span><div class="mini-track"><span id="page-progress"></span></div></div>
+      <button id="listen-story" class="listen-button">🔊 Hear story</button>
+    </div>
+    <article class="story-page">
+      <div id="story-picture" class="story-picture"></div>
+      <div class="story-content">
+        <p id="story-grade" class="eyebrow"></p>
+        <h2 id="story-title"></h2>
+        <div id="story-text" class="story-text" aria-live="polite"></div>
+        <div id="phonics-guide" class="phonics-guide" aria-live="polite">
+          <div class="phonics-heading"><span>Sound it out</span><small>Letters light up as Ari reads</small></div>
+          <div id="phonics-parts" class="phonics-parts"></div>
+        </div>
+        <div id="speech-status" class="speech-status"><span class="status-dot"></span><span>Tap the microphone, then read the glowing word.</span></div>
+        <div class="reader-controls">
+          <button id="prev-page" class="page-button" aria-label="Previous page">←</button>
+          <button id="mic-button" class="mic-button"><span class="mic-icon">🎙️</span><span class="mic-label">Start reading</span></button>
+          <button id="next-page" class="page-button" aria-label="Next page">→</button>
+        </div>
+        <div class="read-aloud-tools">
+          <label for="voice-select">Story voice</label>
+          <select id="voice-select" aria-label="Choose a read-aloud voice"><option>Loading voices…</option></select>
+          <button id="preview-voice" class="voice-preview" type="button">▶ Try</button>
+        </div>
+        <button id="try-word" class="help-button">🔊 Hear this word</button>
+      </div>
+    </article>
+  </div>
+
+  <div id="celebration" class="celebration" aria-hidden="true"><div><span>⭐</span><h2>Wonderful reading!</h2><p>You finished the story.</p><button id="celebration-close">Back to library</button></div></div>
+  <script src="script.js"></script>
 </body>
 </html>

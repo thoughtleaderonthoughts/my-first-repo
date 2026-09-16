@@ -1,80 +1,272 @@
-const searchBtn = document.getElementById('search-btn');
-const cityInput = document.getElementById('city-input');
-const hourlyDiv = document.getElementById('hourly');
-const dailyDiv = document.getElementById('daily');
-const shortsAdvice = document.getElementById('shorts-advice');
+const books = [
+  { id: 1, title: 'The Little Cloud', grade: 'K', time: '3 min', emoji: '☁️', deco: '🌤️', color: '#cfe8ed', pages: ['The little cloud floats in the blue sky.', 'It sees a bird fly by.', 'The cloud makes soft rain for a flower.'] },
+  { id: 2, title: 'Max Finds a Friend', grade: 'K', time: '4 min', emoji: '🐶', deco: '🦋', color: '#f8dfb9', pages: ['Max is a small brown dog.', 'He meets a fox by the old log.', 'Now Max and the fox play all day.'] },
+  { id: 3, title: 'The Moon Garden', grade: '1', time: '5 min', emoji: '🌙', deco: '🌼', color: '#ccd4eb', pages: ['Mia plants seeds beneath the moon.', 'Silver flowers begin to bloom.', 'Tiny moths dance around the garden.'] },
+  { id: 4, title: 'Sam’s Big Adventure', grade: '1', time: '6 min', emoji: '🚲', deco: '🌳', color: '#d9ebcc', pages: ['Sam rides his bike down the path.', 'He crosses a bridge over a stream.', 'At sunset, Sam pedals safely home.'] },
+  { id: 5, title: 'The Secret Treehouse', grade: '2', time: '7 min', emoji: '🌳', deco: '🪜', color: '#e7d5b3', pages: ['A secret treehouse waits in the woods.', 'Inside, we find a map and a lantern.', 'The map leads us to a sparkling pond.'] },
+  { id: 6, title: 'Luna and the Stars', grade: '2', time: '8 min', emoji: '🔭', deco: '⭐', color: '#d8d4eb', pages: ['Luna watches the stars through her telescope.', 'She draws each bright shape in her notebook.', 'One day, Luna hopes to explore space.'] },
+  { id: 7, title: 'A Very Busy Bee', grade: 'K', time: '3 min', emoji: '🐝', deco: '🌻', color: '#f8e6a9', pages: ['Bee buzzes over the green hill.', 'She lands on a big yellow flower.', 'Then Bee carries pollen back home.'] },
+  { id: 8, title: 'The Kind Dragon', grade: '2', time: '7 min', emoji: '🐉', deco: '🏰', color: '#d4e7df', pages: ['A gentle dragon lives beyond the castle.', 'He uses warm breath to bake village bread.', 'Everyone cheers for their helpful friend.'] }
+];
 
-searchBtn.addEventListener('click', () => {
-    const city = cityInput.value.trim();
-    if (!city) return;
-    fetchCityCoordinates(city).then(coords => {
-        if (coords) {
-            fetchWeather(coords.latitude, coords.longitude);
-        } else {
-            hourlyDiv.textContent = '';
-            dailyDiv.textContent = '';
-            shortsAdvice.textContent = 'City not found';
-        }
+const grid = document.getElementById('book-grid');
+const voiceSelect = document.getElementById('voice-select');
+let activeBook = null;
+let page = 0;
+let wordIndex = 0;
+let recognition = null;
+let listening = false;
+let advancing = false;
+let availableVoices = [];
+
+function gradeName(grade) {
+  return grade === 'K' ? 'Kindergarten' : `${grade}${grade === '1' ? 'st' : 'nd'} grade`;
+}
+
+function clean(word) {
+  return word.toLowerCase().replace(/[^a-z']/g, '');
+}
+
+function renderBooks(filter = 'all') {
+  grid.innerHTML = '';
+  books.filter((book) => filter === 'all' || book.grade === filter).forEach((book) => {
+    const card = document.createElement('article');
+    card.className = 'book-card';
+    card.tabIndex = 0;
+    card.setAttribute('aria-label', `Read ${book.title}, ${gradeName(book.grade)}`);
+    card.innerHTML = `<div class="book-cover" style="background:${book.color}"><span class="cloud-deco d1">${book.deco}</span><span class="scene">${book.emoji}</span><span class="cloud-deco d2">☁️</span></div><div class="book-info"><span class="level">${gradeName(book.grade)}</span><h3>${book.title}</h3><div class="book-meta"><span>◷ ${book.time} read</span><span class="read-arrow">→</span></div></div>`;
+    card.addEventListener('click', () => openBook(book));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openBook(book);
+      }
     });
+    grid.appendChild(card);
+  });
+}
+
+document.querySelectorAll('.filter').forEach((button) => button.addEventListener('click', () => {
+  document.querySelector('.filter.active').classList.remove('active');
+  button.classList.add('active');
+  renderBooks(button.dataset.grade);
+}));
+
+function openBook(book) {
+  activeBook = book;
+  page = 0;
+  wordIndex = 0;
+  document.getElementById('reader').classList.add('open');
+  document.getElementById('reader').setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  renderPage();
+}
+
+function renderPage() {
+  stopListening();
+  advancing = false;
+  const words = activeBook.pages[page].split(' ');
+  document.getElementById('story-grade').textContent = gradeName(activeBook.grade);
+  document.getElementById('story-title').textContent = activeBook.title;
+  document.getElementById('story-picture').style.background = activeBook.color;
+  document.getElementById('story-picture').textContent = activeBook.emoji;
+  document.getElementById('story-text').innerHTML = words.map((word, index) => `<span class="word ${index < wordIndex ? 'done' : index === wordIndex ? 'current' : ''}" data-word="${clean(word)}">${word}</span>`).join(' ');
+  document.getElementById('page-label').textContent = `Page ${page + 1} of ${activeBook.pages.length}`;
+  document.getElementById('page-progress').style.width = `${((page + 1) / activeBook.pages.length) * 100}%`;
+  document.getElementById('prev-page').disabled = page === 0;
+  document.getElementById('next-page').disabled = page === activeBook.pages.length - 1;
+  renderPhonics();
+  setStatus(wordIndex ? 'Great job! Keep going.' : 'Tap the microphone, then read the glowing word.');
+}
+
+function currentWord() {
+  return document.querySelector('.word.current')?.dataset.word;
+}
+
+// This kid-friendly visual grouping is intentionally simple. It groups common
+// English letter teams; it is a reading aid rather than a pronunciation dictionary.
+function phonicsParts(word) {
+  const letterTeams = ['tion', 'igh', 'tch', 'dge', 'ch', 'sh', 'th', 'ph', 'wh', 'qu', 'ck', 'ng', 'ee', 'oo', 'ai', 'ay', 'ea', 'oa', 'ow', 'ou', 'oi', 'oy', 'ar', 'er', 'ir', 'or', 'ur'];
+  const parts = [];
+  let cursor = 0;
+  while (cursor < word.length) {
+    const team = letterTeams.find((candidate) => word.startsWith(candidate, cursor));
+    parts.push(team || word[cursor]);
+    cursor += (team || word[cursor]).length;
+  }
+  return parts;
+}
+
+function renderPhonics(highlightedLetters = 0, complete = false) {
+  const word = currentWord();
+  if (!word) return;
+  let lettersSeen = 0;
+  document.getElementById('phonics-parts').innerHTML = phonicsParts(word).map((part) => {
+    lettersSeen += part.length;
+    const highlighted = complete || lettersSeen <= highlightedLetters;
+    return `<span class="phonics-part${highlighted ? ' heard' : ''}">${part}</span>`;
+  }).join('<span class="phonics-dot">·</span>');
+}
+
+function longestSharedPrefix(spoken, expected) {
+  let length = 0;
+  while (length < spoken.length && length < expected.length && spoken[length] === expected[length]) length += 1;
+  return length;
+}
+
+function showSpeechProgress(transcript) {
+  const expected = currentWord();
+  if (!expected) return;
+  const spokenWord = (transcript.toLowerCase().match(/[a-z']+/g) || []).at(-1) || '';
+  renderPhonics(longestSharedPrefix(spokenWord, expected));
+}
+
+function completeCurrentWord() {
+  if (advancing) return;
+  advancing = true;
+  renderPhonics(currentWord().length, true);
+  setStatus('That’s right — every sound came together!');
+  setTimeout(advanceWord, 450);
+}
+
+function advanceWord() {
+  const words = activeBook.pages[page].split(' ');
+  wordIndex += 1;
+  advancing = false;
+  if (wordIndex >= words.length) {
+    if (page < activeBook.pages.length - 1) {
+      setStatus('Page complete! Moving to the next page…');
+      setTimeout(() => {
+        page += 1;
+        wordIndex = 0;
+        renderPage();
+      }, 700);
+    } else {
+      stopListening();
+      document.getElementById('celebration').classList.add('show');
+      document.getElementById('celebration').setAttribute('aria-hidden', 'false');
+    }
+    return;
+  }
+  renderPageWords();
+  renderPhonics();
+  setStatus('Great reading! Sound out the next word.');
+}
+
+function renderPageWords() {
+  document.querySelectorAll('.word').forEach((element, index) => {
+    element.classList.toggle('done', index < wordIndex);
+    element.classList.toggle('current', index === wordIndex);
+  });
+}
+
+function setStatus(text) {
+  document.querySelector('#speech-status span:last-child').textContent = text;
+}
+
+function startListening() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    setStatus('Speech recognition is not available here. Try Chrome or Edge.');
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.continuous = true;
+  recognition.onresult = (event) => {
+    let heard = '';
+    for (let index = event.resultIndex; index < event.results.length; index += 1) heard += `${event.results[index][0].transcript} `;
+    showSpeechProgress(heard);
+    const spoken = heard.toLowerCase().match(/[a-z']+/g) || [];
+    if (spoken.includes(currentWord())) completeCurrentWord();
+    else if (event.results[event.results.length - 1].isFinal) setStatus(`Almost! Sound it out and try “${currentWord()}” again.`);
+  };
+  recognition.onerror = (event) => {
+    if (event.error !== 'aborted') setStatus(event.error === 'not-allowed' ? 'Please allow microphone access to read aloud.' : 'I didn’t catch that. Tap the microphone and try again.');
+    stopListening();
+  };
+  recognition.onend = () => {
+    if (listening) {
+      try { recognition.start(); } catch { stopListening(); }
+    }
+  };
+  recognition.start();
+  listening = true;
+  document.getElementById('mic-button').classList.add('listening');
+  document.querySelector('.mic-label').textContent = 'Listening…';
+  document.getElementById('speech-status').classList.add('listening');
+  setStatus(`Listening for “${currentWord()}”…`);
+}
+
+function stopListening() {
+  listening = false;
+  if (recognition) {
+    recognition.onend = null;
+    try { recognition.stop(); } catch { /* Recognition may already be stopped. */ }
+    recognition = null;
+  }
+  document.getElementById('mic-button').classList.remove('listening');
+  document.querySelector('.mic-label').textContent = 'Start reading';
+  document.getElementById('speech-status').classList.remove('listening');
+}
+
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  availableVoices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith('en'));
+  const previous = voiceSelect.value;
+  voiceSelect.innerHTML = '';
+  availableVoices.forEach((voice, index) => {
+    const option = document.createElement('option');
+    option.value = String(index);
+    option.textContent = `${voice.name}${voice.localService ? ' · on device' : ''}`;
+    voiceSelect.appendChild(option);
+  });
+  if (previous && availableVoices[Number(previous)]) voiceSelect.value = previous;
+  if (!availableVoices.length) voiceSelect.innerHTML = '<option>Default browser voice</option>';
+}
+
+function speak(text) {
+  stopListening();
+  if (!('speechSynthesis' in window)) {
+    setStatus('Read-aloud is not available in this browser.');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = availableVoices[Number(voiceSelect.value)] || null;
+  utterance.rate = 0.82;
+  utterance.pitch = 1.02;
+  window.speechSynthesis.speak(utterance);
+}
+
+function closeReader() {
+  stopListening();
+  window.speechSynthesis?.cancel();
+  document.getElementById('reader').classList.remove('open');
+  document.getElementById('reader').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('mic-button').addEventListener('click', () => (listening ? stopListening() : startListening()));
+document.getElementById('try-word').addEventListener('click', () => speak(currentWord()));
+document.getElementById('listen-story').addEventListener('click', () => speak(activeBook.pages[page]));
+document.getElementById('preview-voice').addEventListener('click', () => speak('Hi Ari! Let’s read a story together.'));
+document.getElementById('close-reader').addEventListener('click', closeReader);
+document.getElementById('prev-page').addEventListener('click', () => { if (page > 0) { page -= 1; wordIndex = 0; renderPage(); } });
+document.getElementById('next-page').addEventListener('click', () => { if (page < activeBook.pages.length - 1) { page += 1; wordIndex = 0; renderPage(); } });
+document.getElementById('celebration-close').addEventListener('click', () => {
+  document.getElementById('celebration').classList.remove('show');
+  document.getElementById('celebration').setAttribute('aria-hidden', 'true');
+  closeReader();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    document.getElementById('celebration').classList.remove('show');
+    closeReader();
+  }
 });
 
-function fetchCityCoordinates(city) {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`;
-    return fetch(url)
-        .then(resp => resp.json())
-        .then(data => {
-            if (data.results && data.results.length > 0) {
-                return data.results[0];
-            }
-            return null;
-        })
-        .catch(() => null);
-}
-
-function fetchWeather(lat, lon) {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m&current_weather=true&timezone=auto&forecast_days=7`;
-    fetch(url)
-        .then(resp => resp.json())
-        .then(data => {
-            displayHourly(data.hourly);
-            displayDaily(data.daily);
-            adviseShorts(data.daily.temperature_2m_max[0]);
-        })
-        .catch(() => {
-            hourlyDiv.textContent = 'Failed to fetch weather';
-            dailyDiv.textContent = '';
-            shortsAdvice.textContent = '';
-        });
-}
-
-function displayHourly(hourly) {
-    hourlyDiv.innerHTML = '';
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
-    for (let i = 0; i < hourly.time.length; i++) {
-        if (hourly.time[i].startsWith(todayStr)) {
-            const p = document.createElement('p');
-            const time = new Date(hourly.time[i]).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-            p.textContent = `${time}: ${hourly.temperature_2m[i]}°C`;
-            hourlyDiv.appendChild(p);
-        }
-    }
-}
-
-function displayDaily(daily) {
-    dailyDiv.innerHTML = '';
-    for (let i = 0; i < daily.time.length; i++) {
-        const p = document.createElement('p');
-        const date = new Date(daily.time[i]).toLocaleDateString();
-        p.textContent = `${date}: ${daily.temperature_2m_min[i]}°C - ${daily.temperature_2m_max[i]}°C`;
-        dailyDiv.appendChild(p);
-    }
-}
-
-function adviseShorts(todayMax) {
-    if (todayMax >= 20) {
-        shortsAdvice.textContent = 'You can wear shorts today!';
-    } else {
-        shortsAdvice.textContent = 'Better wear pants today.';
-    }
-}
+loadVoices();
+if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadVoices;
+renderBooks();
