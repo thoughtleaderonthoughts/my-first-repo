@@ -4,7 +4,7 @@ Bright Reads is a cheerful, browser-based reading practice app for children in k
 
 ## Features
 
-- Eight original stories across kindergarten, first-grade, and second-grade levels
+- Eleven original stories across kindergarten, first-grade, and second-grade levels
 - Grade-level library filters and responsive book cards
 - Guided, word-by-word reading using the browser's Web Speech API
 - A sound-it-out phonics panel that highlights letter teams as speech is recognized
@@ -79,3 +79,11 @@ python -m py_compile preview.py
 Tests run a local PostgreSQL-compatible database through PGlite to exercise the actual SQL: user isolation, progress validation, first completion, duplicate saves, reset, and stale-device rejection. No production credentials are required.
 
 Successful actions use brief fairy-dust, rainbow, and unicorn effects. Reduced-motion settings disable moving effects while keeping text feedback. Email sign-in displays a sending state, actionable failures, and a dismissible check-your-email popup on success.
+
+## Illustrated mini-books
+
+The library includes three longer original books: **Pip and the Missing Picnic** (8 pages, beginner animal mystery), **Nia and the Rainbow Seed** (10 pages, growing-reader magical adventure), and **Milo and the Lost Moon Rover** (12 pages, confident-reader space adventure). The space story visits an imaginary moon.
+
+Every new page has its own original SVG illustration with a descriptive alternative. Filter by grade and story type. Selected pages include optional picture discussion prompts, and each new book ends with an optional comprehension question after every page has been read. Signed-in children resume at their first unfinished page and saved word. Existing stories and IDs are unchanged.
+
+For an existing installation, rerun the updated `supabase/family-profiles.sql` to support the new books and variable page counts. Story content lives in `stories.js`; database word counts must match it (checked automatically by the test suite). Illustrations are in `illustrations/` and are served locally with the app.

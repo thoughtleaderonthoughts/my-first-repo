@@ -46,6 +46,7 @@
           <button class="filter" data-grade="2">2nd grade</button>
         </div>
       </div>
+      <div class="story-themes"><label for="theme-filter">Choose a story type</label><select id="theme-filter"><option value="all">All story types</option><option>Animal mystery</option><option>Magical adventure</option><option>Space adventure</option><option>Everyday wonders</option></select><span>New: three fully illustrated mini-books</span></div>
       <div id="book-grid" class="book-grid"></div>
     </section>
 
@@ -70,7 +71,7 @@
       <button id="listen-story" class="listen-button">🔊 Hear story</button>
     </div>
     <article class="story-page">
-      <div id="story-picture" class="story-picture"></div>
+      <div class="picture-column"><div id="story-picture" class="story-picture"></div><details id="picture-prompt" hidden><summary>Look a little closer</summary><p id="picture-question"></p></details></div>
       <div class="story-content">
         <p id="story-grade" class="eyebrow"></p>
         <h2 id="story-title"></h2>
@@ -98,7 +99,7 @@
     </article>
   </div>
 
-  <div id="celebration" class="celebration" aria-hidden="true"><div><span>⭐</span><h2>Wonderful reading!</h2><p>You finished the story.</p><button id="celebration-close">Back to library</button></div></div>
+  <div id="celebration" class="celebration" aria-hidden="true"><div><span>⭐</span><h2>Wonderful reading!</h2><p>You finished the story.</p><section id="book-question" hidden aria-label="Think about the story"></section><button id="celebration-close">Back to library</button></div></div>
   <dialog id="account-dialog" aria-labelledby="account-title">
     <form method="dialog"><button class="dialog-close" aria-label="Close account">✕</button></form>
     <p class="eyebrow">A LITTLE READING, EVERY DAY</p><h2 id="account-title">Your reading account</h2>
@@ -120,6 +121,7 @@
   <script src="magic.js"></script>
   <script src="app-config.js"></script>
   <script src="progress.js"></script>
+  <script src="stories.js"></script>
   <script src="script.js"></script>
   <script src="account.js"></script>
 </body>

@@ -30,6 +30,15 @@ test('family migration preserves reading; children and parent accounts are isola
   assert.deepEqual((await call('load')).children.default.books,{});
   await assert.rejects(call('preferences',{generation:0,childId:'child-b',name:'Intruder'}),/Child not found/);
   await db.exec("set request.jwt.claim.sub='00000000-0000-0000-0000-000000000001'");
+  for (let page = 0; page < 3; page++) {
+    const b = require('../stories.js').find(b => b.id === 11);
+    family = await call('progress',{generation:0,childId:'child-b',book:11,page,words:b.pages[page].split(' ').length});
+  }
+  assert.equal(family.children['child-b'].books[11].completedAt,undefined);
+  const space = require('../stories.js').find(b => b.id === 11);
+  await assert.rejects(call('progress',{generation:0,childId:'child-b',book:11,page:12,words:1}),/Invalid page/);
+  for (let page = 3; page < 12; page++) family = await call('progress',{generation:0,childId:'child-b',book:11,page,words:space.pages[page].split(' ').length});
+  assert.ok(family.children['child-b'].books[11].completedAt);
   family = await call('reset');
   assert.equal(family.generation,1);
   assert.deepEqual(Object.keys(family.children),['default']);

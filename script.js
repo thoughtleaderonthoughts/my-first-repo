@@ -1,14 +1,3 @@
-const books = [
-  { id: 1, title: 'The Little Cloud', grade: 'K', time: '3 min', emoji: '☁️', deco: '🌤️', color: '#cfe8ed', pages: ['The little cloud floats in the blue sky.', 'It sees a bird fly by.', 'The cloud makes soft rain for a flower.'] },
-  { id: 2, title: 'Max Finds a Friend', grade: 'K', time: '4 min', emoji: '🐶', deco: '🦋', color: '#f8dfb9', pages: ['Max is a small brown dog.', 'He meets a fox by the old log.', 'Now Max and the fox play all day.'] },
-  { id: 3, title: 'The Moon Garden', grade: '1', time: '5 min', emoji: '🌙', deco: '🌼', color: '#ccd4eb', pages: ['Mia plants seeds beneath the moon.', 'Silver flowers begin to bloom.', 'Tiny moths dance around the garden.'] },
-  { id: 4, title: 'Sam’s Big Adventure', grade: '1', time: '6 min', emoji: '🚲', deco: '🌳', color: '#d9ebcc', pages: ['Sam rides his bike down the path.', 'He crosses a bridge over a stream.', 'At sunset, Sam pedals safely home.'] },
-  { id: 5, title: 'The Secret Treehouse', grade: '2', time: '7 min', emoji: '🌳', deco: '🪜', color: '#e7d5b3', pages: ['A secret treehouse waits in the woods.', 'Inside, we find a map and a lantern.', 'The map leads us to a sparkling pond.'] },
-  { id: 6, title: 'Luna and the Stars', grade: '2', time: '8 min', emoji: '🔭', deco: '⭐', color: '#d8d4eb', pages: ['Luna watches the stars through her telescope.', 'She draws each bright shape in her notebook.', 'One day, Luna hopes to explore space.'] },
-  { id: 7, title: 'A Very Busy Bee', grade: 'K', time: '3 min', emoji: '🐝', deco: '🌻', color: '#f8e6a9', pages: ['Bee buzzes over the green hill.', 'She lands on a big yellow flower.', 'Then Bee carries pollen back home.'] },
-  { id: 8, title: 'The Kind Dragon', grade: '2', time: '7 min', emoji: '🐉', deco: '🏰', color: '#d4e7df', pages: ['A gentle dragon lives beyond the castle.', 'He uses warm breath to bake village bread.', 'Everyone cheers for their helpful friend.'] }
-];
-
 const grid = document.getElementById('book-grid');
 const voiceSelect = document.getElementById('voice-select');
 let activeBook = null;
@@ -20,6 +9,7 @@ let advancing = false;
 let availableVoices = [];
 let advanceTimer = null;
 let readerGeneration = 0;
+let readPages = new Set();
 
 function gradeName(grade) {
   return grade === 'K' ? 'Kindergarten' : `${grade}${grade === '1' ? 'st' : 'nd'} grade`;
@@ -31,7 +21,7 @@ function clean(word) {
 
 function renderBooks(filter = 'all') {
   grid.innerHTML = '';
-  books.filter((book) => filter === 'all' || book.grade === filter).forEach((book) => {
+  books.filter((book) => (filter === 'all' || book.grade === filter) && (document.getElementById('theme-filter').value === 'all' || book.theme === document.getElementById('theme-filter').value)).forEach((book) => {
     const card = document.createElement('article');
     card.className = 'book-card';
     card.tabIndex = 0;
@@ -44,6 +34,15 @@ function renderBooks(filter = 'all') {
         openBook(book);
       }
     });
+    if (book.illustrations) {
+      const cover = card.querySelector('.book-cover');
+      const img = document.createElement('img');
+      img.src = book.illustrations[0]; img.alt = book.scenes[0]; img.loading = 'lazy';
+      cover.replaceChildren(img);
+    }
+    const length = document.createElement('p'); length.className = 'book-length';
+    length.textContent = `${book.theme} · ${book.pages.length} pages`;
+    card.querySelector('.book-info').appendChild(length);
     const status = document.createElement('p');
     status.className = 'book-status';
     const record = window.readingAccount?.state.books[book.id];
@@ -51,6 +50,10 @@ function renderBooks(filter = 'all') {
     card.querySelector('.book-info').appendChild(status);
     grid.appendChild(card);
   });
+  if (!grid.children.length) {
+    const empty = document.createElement('p'); empty.textContent = 'No books match both filters yet. Try All books or All story types.';
+    grid.appendChild(empty);
+  }
 }
 
 document.querySelectorAll('.filter').forEach((button) => button.addEventListener('click', () => {
@@ -60,8 +63,15 @@ document.querySelectorAll('.filter').forEach((button) => button.addEventListener
   celebrate();
 }));
 
+document.getElementById('theme-filter').addEventListener('change', () => {
+  renderBooks(document.querySelector('.filter.active').dataset.grade); celebrate();
+});
+
 function openBook(book) {
   activeBook = book;
+  const record = window.readingAccount?.state.books[book.id];
+  readPages = new Set(book.pages.map((text, i) => (record?.pages[i] || 0) >= text.split(' ').length ? i : -1).filter(i => i >= 0));
+  document.getElementById('book-question').hidden = true;
   const saved = ProgressModel.resume(window.readingAccount?.state.books[book.id], book);
   page = saved.page;
   wordIndex = saved.word;
@@ -74,6 +84,7 @@ function openBook(book) {
 }
 
 function renderPage() {
+  document.getElementById('reader').scrollTop = 0;
   stopListening();
   clearTimeout(advanceTimer);
   advancing = false;
@@ -81,7 +92,15 @@ function renderPage() {
   document.getElementById('story-grade').textContent = gradeName(activeBook.grade);
   document.getElementById('story-title').textContent = activeBook.title;
   document.getElementById('story-picture').style.background = activeBook.color;
-  document.getElementById('story-picture').textContent = activeBook.emoji;
+  const picture = document.getElementById('story-picture');
+  picture.replaceChildren();
+  if (activeBook.illustrations) {
+    const img = document.createElement('img'); img.src = activeBook.illustrations[page]; img.alt = activeBook.scenes[page];
+    picture.appendChild(img);
+  } else picture.textContent = activeBook.emoji;
+  const prompt = document.getElementById('picture-prompt');
+  prompt.hidden = !activeBook.prompts?.[page]; prompt.open = false;
+  document.getElementById('picture-question').textContent = activeBook.prompts?.[page] || '';
   document.getElementById('story-text').innerHTML = words.map((word, index) => `<span class="word ${index < wordIndex ? 'done' : index === wordIndex ? 'current' : ''}" data-word="${clean(word)}">${word}</span>`).join(' ');
   document.getElementById('page-label').textContent = `Page ${page + 1} of ${activeBook.pages.length}`;
   document.getElementById('page-progress').style.width = `${((page + 1) / activeBook.pages.length) * 100}%`;
@@ -148,6 +167,7 @@ function advanceWord() {
   window.readingAccount?.record(activeBook.id, page, wordIndex, readerGeneration);
   advancing = false;
   if (wordIndex >= words.length) {
+    readPages.add(page);
     if (page < activeBook.pages.length - 1) {
       setStatus('Page complete! Moving to the next page…');
       celebrate('Page complete!', true);
@@ -162,7 +182,8 @@ function advanceWord() {
       renderPageWords();
       celebrate('Wonderful reading!', true);
       stopListening();
-      document.querySelector('#celebration p').textContent = 'Page complete! Your bookshelf shows your saved progress.';
+      document.querySelector('#celebration p').textContent = readPages.size === activeBook.pages.length ? 'You finished every page! Wonderful work.' : 'Page complete! Read the other pages to finish this book.';
+      showBookQuestion();
       document.getElementById('celebration').classList.add('show');
       document.getElementById('celebration').setAttribute('aria-hidden', 'false');
     }
@@ -303,3 +324,22 @@ renderBooks();
 
 voiceSelect.addEventListener('change', () => window.readingAccount?.preferences({ voice: voiceSelect.value }));
 document.getElementById('voice-speed').addEventListener('change', (event) => window.readingAccount?.preferences({ rate: Number(event.target.value) }));
+
+function showBookQuestion() {
+  const section = document.getElementById('book-question'); section.replaceChildren();
+  const q = activeBook.question;
+  section.hidden = !q || readPages.size !== activeBook.pages.length;
+  if (section.hidden) return;
+  const title = document.createElement('h3'); title.textContent = q.text;
+  const feedback = document.createElement('p'); feedback.setAttribute('role', 'status');
+  section.appendChild(title);
+  q.choices.forEach((choice, i) => {
+    const button = document.createElement('button'); button.textContent = choice;
+    button.addEventListener('click', () => {
+      feedback.textContent = i === q.answer ? 'Yes! You remembered an important part of the story.' : 'Good thinking. Try another answer, or read the story again.';
+      if (i === q.answer) { celebrate('Story detective!', true); section.querySelectorAll('button').forEach(b => b.disabled = true); }
+    });
+    section.appendChild(button);
+  });
+  section.appendChild(feedback);
+}

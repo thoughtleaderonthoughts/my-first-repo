@@ -8,7 +8,7 @@ declare
   child_id text;
   record jsonb;
   page_counts jsonb;
-  catalog jsonb := '[[8, 6, 8], [6, 8, 8], [6, 5, 6], [7, 7, 6], [7, 8, 8], [7, 8, 7], [6, 7, 6], [7, 8, 6]]'::jsonb;
+  catalog jsonb := '{"1":[8,6,8],"2":[6,8,8],"3":[6,5,6],"4":[7,7,6],"5":[7,8,8],"6":[7,8,7],"7":[6,7,6],"8":[7,8,6],"9":[11,12,13,12,14,12,14,14],"10":[24,22,27,25,25,25,25,26,28,28],"11":[35,36,36,35,35,35,37,37,34,36,37,35]}'::jsonb;
   book integer; page integer; words integer; i integer;
   done boolean := true;
   generation integer;
@@ -60,12 +60,13 @@ begin
       book := (payload->>'book')::integer;
       page := (payload->>'page')::integer;
       words := (payload->>'words')::integer;
-      if book is null or page is null or words is null or book not between 1 and 8 or page not between 0 and 2 then raise exception 'Invalid progress'; end if;
-      page_counts := catalog->(book-1);
+      if book is null or page is null or words is null or not (catalog ? book::text) then raise exception 'Invalid progress'; end if;
+      page_counts := catalog->book::text;
+      if page < 0 or page >= jsonb_array_length(page_counts) then raise exception 'Invalid page'; end if;
       if words not between 1 and (page_counts->>page)::integer then raise exception 'Invalid word count'; end if;
       record := coalesce(current_state->'books'->book::text, '{"pages":{}}'::jsonb);
       record := jsonb_set(record,array['pages',page::text],to_jsonb(greatest(words,coalesce((record->'pages'->>page::text)::integer,0))),true);
-      for i in 0..2 loop
+      for i in 0..jsonb_array_length(page_counts)-1 loop
         if coalesce((record->'pages'->>i::text)::integer,0) < (page_counts->>i)::integer then done := false; end if;
       end loop;
       if done and not(record ? 'completedAt') then record := jsonb_set(record,'{completedAt}',to_jsonb(now())); end if;
