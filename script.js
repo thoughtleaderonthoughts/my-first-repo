@@ -1,14 +1,3 @@
-const books = [
-  { id: 1, title: 'The Little Cloud', grade: 'K', time: '3 min', emoji: '☁️', deco: '🌤️', color: '#cfe8ed', pages: ['The little cloud floats in the blue sky.', 'It sees a bird fly by.', 'The cloud makes soft rain for a flower.'] },
-  { id: 2, title: 'Max Finds a Friend', grade: 'K', time: '4 min', emoji: '🐶', deco: '🦋', color: '#f8dfb9', pages: ['Max is a small brown dog.', 'He meets a fox by the old log.', 'Now Max and the fox play all day.'] },
-  { id: 3, title: 'The Moon Garden', grade: '1', time: '5 min', emoji: '🌙', deco: '🌼', color: '#ccd4eb', pages: ['Mia plants seeds beneath the moon.', 'Silver flowers begin to bloom.', 'Tiny moths dance around the garden.'] },
-  { id: 4, title: 'Sam’s Big Adventure', grade: '1', time: '6 min', emoji: '🚲', deco: '🌳', color: '#d9ebcc', pages: ['Sam rides his bike down the path.', 'He crosses a bridge over a stream.', 'At sunset, Sam pedals safely home.'] },
-  { id: 5, title: 'The Secret Treehouse', grade: '2', time: '7 min', emoji: '🌳', deco: '🪜', color: '#e7d5b3', pages: ['A secret treehouse waits in the woods.', 'Inside, we find a map and a lantern.', 'The map leads us to a sparkling pond.'] },
-  { id: 6, title: 'Luna and the Stars', grade: '2', time: '8 min', emoji: '🔭', deco: '⭐', color: '#d8d4eb', pages: ['Luna watches the stars through her telescope.', 'She draws each bright shape in her notebook.', 'One day, Luna hopes to explore space.'] },
-  { id: 7, title: 'A Very Busy Bee', grade: 'K', time: '3 min', emoji: '🐝', deco: '🌻', color: '#f8e6a9', pages: ['Bee buzzes over the green hill.', 'She lands on a big yellow flower.', 'Then Bee carries pollen back home.'] },
-  { id: 8, title: 'The Kind Dragon', grade: '2', time: '7 min', emoji: '🐉', deco: '🏰', color: '#d4e7df', pages: ['A gentle dragon lives beyond the castle.', 'He uses warm breath to bake village bread.', 'Everyone cheers for their helpful friend.'] }
-];
-
 const grid = document.getElementById('book-grid');
 const voiceSelect = document.getElementById('voice-select');
 let activeBook = null;
@@ -18,6 +7,9 @@ let recognition = null;
 let listening = false;
 let advancing = false;
 let availableVoices = [];
+let advanceTimer = null;
+let readerGeneration = 0;
+let readPages = new Set();
 
 function gradeName(grade) {
   return grade === 'K' ? 'Kindergarten' : `${grade}${grade === '1' ? 'st' : 'nd'} grade`;
@@ -29,7 +21,7 @@ function clean(word) {
 
 function renderBooks(filter = 'all') {
   grid.innerHTML = '';
-  books.filter((book) => filter === 'all' || book.grade === filter).forEach((book) => {
+  books.filter((book) => (filter === 'all' || book.grade === filter) && (document.getElementById('theme-filter').value === 'all' || book.theme === document.getElementById('theme-filter').value)).forEach((book) => {
     const card = document.createElement('article');
     card.className = 'book-card';
     card.tabIndex = 0;
@@ -42,34 +34,73 @@ function renderBooks(filter = 'all') {
         openBook(book);
       }
     });
+    if (book.illustrations) {
+      const cover = card.querySelector('.book-cover');
+      const img = document.createElement('img');
+      img.src = book.illustrations[0]; img.alt = book.scenes[0]; img.loading = 'lazy';
+      cover.replaceChildren(img);
+    }
+    const length = document.createElement('p'); length.className = 'book-length';
+    length.textContent = `${book.theme} · ${book.pages.length} pages${book.attribution ? " · Retelling" : ""}`;
+    card.querySelector('.book-info').appendChild(length);
+    const status = document.createElement('p');
+    status.className = 'book-status';
+    const record = window.readingAccount?.state.books[book.id];
+    status.textContent = record?.completedAt ? '✓ Completed · Read again' : record ? 'Continue reading' : 'Start a new adventure';
+    card.querySelector('.book-info').appendChild(status);
     grid.appendChild(card);
   });
+  if (!grid.children.length) {
+    const empty = document.createElement('p'); empty.textContent = 'No books match both filters yet. Try All books or All story types.';
+    grid.appendChild(empty);
+  }
 }
 
 document.querySelectorAll('.filter').forEach((button) => button.addEventListener('click', () => {
   document.querySelector('.filter.active').classList.remove('active');
   button.classList.add('active');
   renderBooks(button.dataset.grade);
+  celebrate();
 }));
+
+document.getElementById('theme-filter').addEventListener('change', () => {
+  renderBooks(document.querySelector('.filter.active').dataset.grade); celebrate();
+});
 
 function openBook(book) {
   activeBook = book;
-  page = 0;
-  wordIndex = 0;
+  const record = window.readingAccount?.state.books[book.id];
+  readPages = new Set(book.pages.map((text, i) => (record?.pages[i] || 0) >= text.split(' ').length ? i : -1).filter(i => i >= 0));
+  document.getElementById('book-question').hidden = true;
+  const saved = ProgressModel.resume(window.readingAccount?.state.books[book.id], book);
+  page = saved.page;
+  wordIndex = saved.word;
+  readerGeneration = window.readingAccount?.state.generation || 0;
   document.getElementById('reader').classList.add('open');
   document.getElementById('reader').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   renderPage();
+  celebrate();
 }
 
 function renderPage() {
+  document.getElementById('reader').scrollTop = 0;
   stopListening();
+  clearTimeout(advanceTimer);
   advancing = false;
   const words = activeBook.pages[page].split(' ');
-  document.getElementById('story-grade').textContent = gradeName(activeBook.grade);
+  document.getElementById('story-grade').textContent = gradeName(activeBook.grade) + (activeBook.attribution ? ' · ' + activeBook.attribution : '');
   document.getElementById('story-title').textContent = activeBook.title;
   document.getElementById('story-picture').style.background = activeBook.color;
-  document.getElementById('story-picture').textContent = activeBook.emoji;
+  const picture = document.getElementById('story-picture');
+  picture.replaceChildren();
+  if (activeBook.illustrations) {
+    const img = document.createElement('img'); img.src = activeBook.illustrations[page]; img.alt = activeBook.scenes[page];
+    picture.appendChild(img);
+  } else picture.textContent = activeBook.emoji;
+  const prompt = document.getElementById('picture-prompt');
+  prompt.hidden = !activeBook.prompts?.[page]; prompt.open = false;
+  document.getElementById('picture-question').textContent = activeBook.prompts?.[page] || '';
   document.getElementById('story-text').innerHTML = words.map((word, index) => `<span class="word ${index < wordIndex ? 'done' : index === wordIndex ? 'current' : ''}" data-word="${clean(word)}">${word}</span>`).join(' ');
   document.getElementById('page-label').textContent = `Page ${page + 1} of ${activeBook.pages.length}`;
   document.getElementById('page-progress').style.width = `${((page + 1) / activeBook.pages.length) * 100}%`;
@@ -122,27 +153,37 @@ function showSpeechProgress(transcript) {
 }
 
 function completeCurrentWord() {
-  if (advancing) return;
+  if (advancing || !currentWord()) return;
   advancing = true;
   renderPhonics(currentWord().length, true);
   setStatus('That’s right — every sound came together!');
-  setTimeout(advanceWord, 450);
+  celebrate();
+  advanceTimer = setTimeout(advanceWord, 450);
 }
 
 function advanceWord() {
   const words = activeBook.pages[page].split(' ');
   wordIndex += 1;
+  window.readingAccount?.record(activeBook.id, page, wordIndex, readerGeneration);
   advancing = false;
   if (wordIndex >= words.length) {
+    readPages.add(page);
     if (page < activeBook.pages.length - 1) {
       setStatus('Page complete! Moving to the next page…');
-      setTimeout(() => {
+      celebrate('Page complete!', true);
+      advancing = true;
+      stopListening();
+      advanceTimer = setTimeout(() => {
         page += 1;
         wordIndex = 0;
         renderPage();
       }, 700);
     } else {
+      renderPageWords();
+      celebrate('Wonderful reading!', true);
       stopListening();
+      document.querySelector('#celebration p').textContent = readPages.size === activeBook.pages.length ? 'You finished every page! Wonderful work.' : 'Page complete! Read the other pages to finish this book.';
+      showBookQuestion();
       document.getElementById('celebration').classList.add('show');
       document.getElementById('celebration').setAttribute('aria-hidden', 'false');
     }
@@ -203,6 +244,8 @@ function stopListening() {
   listening = false;
   if (recognition) {
     recognition.onend = null;
+    recognition.onresult = null;
+    recognition.onerror = null;
     try { recognition.stop(); } catch { /* Recognition may already be stopped. */ }
     recognition = null;
   }
@@ -212,18 +255,20 @@ function stopListening() {
 }
 
 function loadVoices() {
-  if (!('speechSynthesis' in window)) return;
-  availableVoices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith('en'));
-  const previous = voiceSelect.value;
-  voiceSelect.innerHTML = '';
-  availableVoices.forEach((voice, index) => {
-    const option = document.createElement('option');
-    option.value = String(index);
-    option.textContent = `${voice.name}${voice.localService ? ' · on device' : ''}`;
-    voiceSelect.appendChild(option);
-  });
-  if (previous && availableVoices[Number(previous)]) voiceSelect.value = previous;
-  if (!availableVoices.length) voiceSelect.innerHTML = '<option>Default browser voice</option>';
+  const note = document.getElementById('voice-note');
+  const supported = 'speechSynthesis' in window;
+  availableVoices = supported ? window.speechSynthesis.getVoices().filter((voice) => /^en([-_]|$)/i.test(voice.lang)) : [];
+  const preferred = window.readingAccount?.state.voice || '';
+  voiceSelect.replaceChildren(new Option('Default browser voice', ''));
+  for (const voice of availableVoices) {
+    voiceSelect.appendChild(new Option(`${voice.name} · ${voice.lang}${voice.localService ? ' · on device' : ' · online'}`, voice.voiceURI));
+  }
+  const found = availableVoices.some((voice) => voice.voiceURI === preferred);
+  voiceSelect.value = found ? preferred : '';
+  voiceSelect.disabled = !supported;
+  document.getElementById('preview-voice').disabled = !supported;
+  document.getElementById('voice-speed').value = String(window.readingAccount?.state.rate || 0.82);
+  note.textContent = !supported ? 'Read-aloud is not available in this browser.' : preferred && !found ? 'Your saved voice is unavailable on this device. Using the browser default; choose another voice here.' : availableVoices.length ? 'Try the different narrators to find your favorite. Voices are supplied by your device and browser.' : 'Using the browser default. More voices may appear after your device loads them.';
 }
 
 function speak(text) {
@@ -234,13 +279,18 @@ function speak(text) {
   }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = availableVoices[Number(voiceSelect.value)] || null;
-  utterance.rate = 0.82;
-  utterance.pitch = 1.02;
+  utterance.voice = availableVoices.find((voice) => voice.voiceURI === voiceSelect.value) || null;
+  utterance.lang = utterance.voice?.lang || 'en-US';
+  utterance.rate = Number(document.getElementById('voice-speed').value);
+  utterance.pitch = 1;
+  utterance.onerror = () => { document.getElementById('voice-note').textContent = 'This voice could not play. Try another voice.'; };
+  utterance.onstart = () => celebrate();
   window.speechSynthesis.speak(utterance);
 }
 
 function closeReader() {
+  clearTimeout(advanceTimer);
+  advancing = false;
   stopListening();
   window.speechSynthesis?.cancel();
   document.getElementById('reader').classList.remove('open');
@@ -251,7 +301,7 @@ function closeReader() {
 document.getElementById('mic-button').addEventListener('click', () => (listening ? stopListening() : startListening()));
 document.getElementById('try-word').addEventListener('click', () => speak(currentWord()));
 document.getElementById('listen-story').addEventListener('click', () => speak(activeBook.pages[page]));
-document.getElementById('preview-voice').addEventListener('click', () => speak('Hi Ari! Let’s read a story together.'));
+document.getElementById('preview-voice').addEventListener('click', () => speak(`Hi ${window.readingAccount?.state.name || 'reader'}! Let’s read a story together.`));
 document.getElementById('close-reader').addEventListener('click', closeReader);
 document.getElementById('prev-page').addEventListener('click', () => { if (page > 0) { page -= 1; wordIndex = 0; renderPage(); } });
 document.getElementById('next-page').addEventListener('click', () => { if (page < activeBook.pages.length - 1) { page += 1; wordIndex = 0; renderPage(); } });
@@ -263,6 +313,7 @@ document.getElementById('celebration-close').addEventListener('click', () => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     document.getElementById('celebration').classList.remove('show');
+    document.getElementById('celebration').setAttribute('aria-hidden', 'true');
     closeReader();
   }
 });
@@ -270,3 +321,25 @@ document.addEventListener('keydown', (event) => {
 loadVoices();
 if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadVoices;
 renderBooks();
+
+voiceSelect.addEventListener('change', () => window.readingAccount?.preferences({ voice: voiceSelect.value }));
+document.getElementById('voice-speed').addEventListener('change', (event) => window.readingAccount?.preferences({ rate: Number(event.target.value) }));
+
+function showBookQuestion() {
+  const section = document.getElementById('book-question'); section.replaceChildren();
+  const q = activeBook.question;
+  section.hidden = !q || readPages.size !== activeBook.pages.length;
+  if (section.hidden) return;
+  const title = document.createElement('h3'); title.textContent = q.text;
+  const feedback = document.createElement('p'); feedback.setAttribute('role', 'status');
+  section.appendChild(title);
+  q.choices.forEach((choice, i) => {
+    const button = document.createElement('button'); button.textContent = choice;
+    button.addEventListener('click', () => {
+      feedback.textContent = i === q.answer ? 'Yes! You remembered an important part of the story.' : 'Good thinking. Try another answer, or read the story again.';
+      if (i === q.answer) { celebrate('Story detective!', true); section.querySelectorAll('button').forEach(b => b.disabled = true); }
+    });
+    section.appendChild(button);
+  });
+  section.appendChild(feedback);
+}
