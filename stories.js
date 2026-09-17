@@ -49,16 +49,16 @@ const books = [
       "answer": 1
     },
     "illustrations": [
-      "illustrations/book-12-1.svg",
-      "illustrations/book-12-2.svg",
-      "illustrations/book-12-3.svg",
-      "illustrations/book-12-4.svg",
-      "illustrations/book-12-5.svg",
-      "illustrations/book-12-6.svg",
-      "illustrations/book-12-7.svg",
-      "illustrations/book-12-8.svg",
-      "illustrations/book-12-9.svg",
-      "illustrations/book-12-10.svg"
+      "illustrations/book-12-1.webp",
+      "illustrations/book-12-2.webp",
+      "illustrations/book-12-3.webp",
+      "illustrations/book-12-4.webp",
+      "illustrations/book-12-5.webp",
+      "illustrations/book-12-6.webp",
+      "illustrations/book-12-7.webp",
+      "illustrations/book-12-8.webp",
+      "illustrations/book-12-9.webp",
+      "illustrations/book-12-10.webp"
     ]
   },
   {
@@ -110,16 +110,16 @@ const books = [
       "answer": 2
     },
     "illustrations": [
-      "illustrations/book-13-1.svg",
-      "illustrations/book-13-2.svg",
-      "illustrations/book-13-3.svg",
-      "illustrations/book-13-4.svg",
-      "illustrations/book-13-5.svg",
-      "illustrations/book-13-6.svg",
-      "illustrations/book-13-7.svg",
-      "illustrations/book-13-8.svg",
-      "illustrations/book-13-9.svg",
-      "illustrations/book-13-10.svg"
+      "illustrations/book-13-1.webp",
+      "illustrations/book-13-2.webp",
+      "illustrations/book-13-3.webp",
+      "illustrations/book-13-4.webp",
+      "illustrations/book-13-5.webp",
+      "illustrations/book-13-6.webp",
+      "illustrations/book-13-7.webp",
+      "illustrations/book-13-8.webp",
+      "illustrations/book-13-9.webp",
+      "illustrations/book-13-10.webp"
     ]
   },
   {
@@ -167,14 +167,14 @@ const books = [
       "answer": 0
     },
     "illustrations": [
-      "illustrations/book-14-1.svg",
-      "illustrations/book-14-2.svg",
-      "illustrations/book-14-3.svg",
-      "illustrations/book-14-4.svg",
-      "illustrations/book-14-5.svg",
-      "illustrations/book-14-6.svg",
-      "illustrations/book-14-7.svg",
-      "illustrations/book-14-8.svg"
+      "illustrations/book-14-1.webp",
+      "illustrations/book-14-2.webp",
+      "illustrations/book-14-3.webp",
+      "illustrations/book-14-4.webp",
+      "illustrations/book-14-5.webp",
+      "illustrations/book-14-6.webp",
+      "illustrations/book-14-7.webp",
+      "illustrations/book-14-8.webp"
     ]
   },
   {
@@ -221,14 +221,14 @@ const books = [
       "answer": 0
     },
     "illustrations": [
-      "illustrations/book-9-1.svg",
-      "illustrations/book-9-2.svg",
-      "illustrations/book-9-3.svg",
-      "illustrations/book-9-4.svg",
-      "illustrations/book-9-5.svg",
-      "illustrations/book-9-6.svg",
-      "illustrations/book-9-7.svg",
-      "illustrations/book-9-8.svg"
+      "illustrations/book-9-1.webp",
+      "illustrations/book-9-2.webp",
+      "illustrations/book-9-3.webp",
+      "illustrations/book-9-4.webp",
+      "illustrations/book-9-5.webp",
+      "illustrations/book-9-6.webp",
+      "illustrations/book-9-7.webp",
+      "illustrations/book-9-8.webp"
     ]
   },
   {
@@ -279,16 +279,16 @@ const books = [
       "answer": 1
     },
     "illustrations": [
-      "illustrations/book-10-1.svg",
-      "illustrations/book-10-2.svg",
-      "illustrations/book-10-3.svg",
-      "illustrations/book-10-4.svg",
-      "illustrations/book-10-5.svg",
-      "illustrations/book-10-6.svg",
-      "illustrations/book-10-7.svg",
-      "illustrations/book-10-8.svg",
-      "illustrations/book-10-9.svg",
-      "illustrations/book-10-10.svg"
+      "illustrations/book-10-1.webp",
+      "illustrations/book-10-2.webp",
+      "illustrations/book-10-3.webp",
+      "illustrations/book-10-4.webp",
+      "illustrations/book-10-5.webp",
+      "illustrations/book-10-6.webp",
+      "illustrations/book-10-7.webp",
+      "illustrations/book-10-8.webp",
+      "illustrations/book-10-9.webp",
+      "illustrations/book-10-10.webp"
     ]
   },
   {
@@ -316,7 +316,7 @@ const books = [
     ],
     "scenes": [
       "Milo and blue robot Dot pack tools beside their rocket.",
-      "Their white and orange rocket rises above a green planet.",
+      "Milo and Dot look out from their rocket as it rises above a green planet.",
       "The rocket lands among pale moon craters.",
       "Milo and Dot inspect wheel tracks near the charging station.",
       "The rover rests in the shadow of a ridge.",
@@ -343,18 +343,18 @@ const books = [
       "answer": 2
     },
     "illustrations": [
-      "illustrations/book-11-1.svg",
-      "illustrations/book-11-2.svg",
-      "illustrations/book-11-3.svg",
-      "illustrations/book-11-4.svg",
-      "illustrations/book-11-5.svg",
-      "illustrations/book-11-6.svg",
-      "illustrations/book-11-7.svg",
-      "illustrations/book-11-8.svg",
-      "illustrations/book-11-9.svg",
-      "illustrations/book-11-10.svg",
-      "illustrations/book-11-11.svg",
-      "illustrations/book-11-12.svg"
+      "illustrations/book-11-1.webp",
+      "illustrations/book-11-2.webp",
+      "illustrations/book-11-3.webp",
+      "illustrations/book-11-4.webp",
+      "illustrations/book-11-5.webp",
+      "illustrations/book-11-6.webp",
+      "illustrations/book-11-7.webp",
+      "illustrations/book-11-8.webp",
+      "illustrations/book-11-9.webp",
+      "illustrations/book-11-10.webp",
+      "illustrations/book-11-11.webp",
+      "illustrations/book-11-12.webp"
     ]
   },
   {
@@ -370,7 +370,17 @@ const books = [
       "It sees a bird fly by.",
       "The cloud makes soft rain for a flower."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-1-1.webp",
+      "illustrations/book-1-2.webp",
+      "illustrations/book-1-3.webp"
+    ],
+    "scenes": [
+      "A little white cloud drifts over green countryside beneath a blue sky.",
+      "A small bird flies past the little cloud.",
+      "Gentle rain falls from the cloud onto a pink flower."
+    ]
   },
   {
     "id": 2,
@@ -385,7 +395,17 @@ const books = [
       "He meets a fox by the old log.",
       "Now Max and the fox play all day."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-2-1.webp",
+      "illustrations/book-2-2.webp",
+      "illustrations/book-2-3.webp"
+    ],
+    "scenes": [
+      "Max, a small brown puppy, stands in a woodland clearing.",
+      "Max meets a young fox beside a mossy fallen log.",
+      "Max and the fox play together among woodland flowers."
+    ]
   },
   {
     "id": 3,
@@ -400,7 +420,17 @@ const books = [
       "Silver flowers begin to bloom.",
       "Tiny moths dance around the garden."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-3-1.webp",
+      "illustrations/book-3-2.webp",
+      "illustrations/book-3-3.webp"
+    ],
+    "scenes": [
+      "Mia plants seeds in her garden under the moon.",
+      "Silver flowers bloom in the moonlit garden.",
+      "Tiny pale moths flutter around the silver flowers."
+    ]
   },
   {
     "id": 4,
@@ -415,7 +445,17 @@ const books = [
       "He crosses a bridge over a stream.",
       "At sunset, Sam pedals safely home."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-4-1.webp",
+      "illustrations/book-4-2.webp",
+      "illustrations/book-4-3.webp"
+    ],
+    "scenes": [
+      "Sam wears his helmet and cycles along a leafy path.",
+      "Sam cycles across a wooden bridge above a stream.",
+      "Sam rides home in the warm evening light."
+    ]
   },
   {
     "id": 5,
@@ -430,7 +470,17 @@ const books = [
       "Inside, we find a map and a lantern.",
       "The map leads us to a sparkling pond."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-5-1.webp",
+      "illustrations/book-5-2.webp",
+      "illustrations/book-5-3.webp"
+    ],
+    "scenes": [
+      "A wooden treehouse nestles in the branches of an old oak.",
+      "Two friends discover a map and a brass lantern inside the treehouse.",
+      "The friends follow their map to a sparkling woodland pond."
+    ]
   },
   {
     "id": 6,
@@ -445,7 +495,17 @@ const books = [
       "She draws each bright shape in her notebook.",
       "One day, Luna hopes to explore space."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-6-1.webp",
+      "illustrations/book-6-2.webp",
+      "illustrations/book-6-3.webp"
+    ],
+    "scenes": [
+      "Luna looks at the stars through a brass telescope.",
+      "Luna records bright star patterns in her notebook.",
+      "Luna dreams of exploring space while looking at the night sky."
+    ]
   },
   {
     "id": 7,
@@ -460,7 +520,17 @@ const books = [
       "She lands on a big yellow flower.",
       "Then Bee carries pollen back home."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-7-1.webp",
+      "illustrations/book-7-2.webp",
+      "illustrations/book-7-3.webp"
+    ],
+    "scenes": [
+      "A golden honeybee flies over a green meadow.",
+      "The bee lands on a large yellow sunflower.",
+      "The bee returns to her home with pollen on her legs."
+    ]
   },
   {
     "id": 8,
@@ -475,7 +545,17 @@ const books = [
       "He uses warm breath to bake village bread.",
       "Everyone cheers for their helpful friend."
     ],
-    "theme": "Everyday wonders"
+    "theme": "Everyday wonders",
+    "illustrations": [
+      "illustrations/book-8-1.webp",
+      "illustrations/book-8-2.webp",
+      "illustrations/book-8-3.webp"
+    ],
+    "scenes": [
+      "A gentle green dragon stands in a village near an old stone castle.",
+      "The dragon uses warm breath to help bake bread in a village oven.",
+      "Happy villagers celebrate their helpful dragon friend."
+    ]
   }
 ];
 if (typeof module !== "undefined") module.exports = books;

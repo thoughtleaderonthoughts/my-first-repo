@@ -4,7 +4,7 @@ Bright Reads is a cheerful, browser-based reading practice app for children in k
 
 ## Features
 
-- Eleven original stories across kindergarten, first-grade, and second-grade levels
+- Fourteen illustrated stories: eleven originals and three classic retellings across kindergarten, first-grade, and second-grade levels
 - Grade-level library filters and responsive book cards
 - Guided, word-by-word reading using the browser's Web Speech API
 - A sound-it-out phonics panel that highlights letter teams as speech is recognized
@@ -47,7 +47,7 @@ Open **My reading account** and sign in using an email link. Use a parent or gua
 - Progress syncs after each recognized word. Refresh progress or return to the browser window to fetch another device's changes.
 - The dashboard shows unique books completed, pages completed, word positions mastered, and books in progress. Re-reading does not inflate these totals.
 - The bookshelf shows grade, completed pages, and first completion date, with Continue or Read again buttons.
-- All three pages must be read to finish a book. Skipping pages and playing read-aloud do not count as reading progress.
+- Every page must be read to finish a book. Skipping pages and playing read-aloud do not count as reading progress.
 - **Reset everything** clears every child profile and their cloud progress, nicknames, and voice/speed preferences after confirmation. It retains the authentication account. Other devices refresh the reset state; stale writes are rejected.
 - The voice picker lists actual English voices supplied by the device/browser. Use **Try** to sample them, and choose Slow, Gentle, or Natural speed. Your voice preference syncs; a missing voice falls back to the browser default on another device.
 
@@ -84,12 +84,18 @@ Successful actions use brief fairy-dust, rainbow, and unicorn effects. Reduced-m
 
 The library includes three longer original books: **Pip and the Missing Picnic** (8 pages, beginner animal mystery), **Nia and the Rainbow Seed** (10 pages, growing-reader magical adventure), and **Milo and the Lost Moon Rover** (12 pages, confident-reader space adventure). The space story visits an imaginary moon.
 
-Every new page has its own original SVG illustration with a descriptive alternative. Filter by grade and story type. Selected pages include optional picture discussion prompts, and each new book ends with an optional comprehension question after every page has been read. Signed-in children resume at their first unfinished page and saved word. Existing stories and IDs are unchanged.
+Every new page has its own original picture-book illustration with a descriptive alternative. Filter by grade and story type. Selected pages include optional picture discussion prompts, and each new book ends with an optional comprehension question after every page has been read. Signed-in children resume at their first unfinished page and saved word. Existing stories and IDs are unchanged.
 
 For an existing installation, rerun the updated `supabase/family-profiles.sql` to support the new books and variable page counts. Story content lives in `stories.js`; database word counts must match it (checked automatically by the test suite). Illustrations are in `illustrations/` and are served locally with the app.
 
 ### Classic tales
 
-The Classics shelf contains original, simplified retellings: The Tale of Peter Rabbit (10 pages, grade 1), The Three Little Pigs (10 pages, kindergarten), and The Tortoise and the Hare (8 pages, kindergarten). All 28 pages have original SVG artwork, descriptive alternative text, picture prompts and a finishing question. Retellings are labelled in the library and reader; they are not verbatim editions.
+The Classics shelf contains original, simplified retellings: The Tale of Peter Rabbit (10 pages, grade 1), The Three Little Pigs (10 pages, kindergarten), and The Tortoise and the Hare (8 pages, kindergarten). All 28 pages have original picture-book artwork, descriptive alternative text, picture prompts and a finishing question. Retellings are labelled in the library and reader; they are not verbatim editions.
 
 Sources: Beatrix Potter’s 1902 [The Tale of Peter Rabbit](https://www.gutenberg.org/ebooks/14838), the traditional [Three Little Pigs](https://www.gutenberg.org/ebooks/18155), and [Aesop’s fables](https://www.gutenberg.org/ebooks/21). These source stories are public domain in the United States. No modern adaptations, publisher artwork, branding or Roald Dahl text is included. The Three Little Pigs has a gentle ending in which all pigs survive and the wolf leaves. For deployment elsewhere, check the source works’ local public-domain status. Rerun `supabase/family-profiles.sql` to register the new books with cloud progress validation.
+
+### Picture-book artwork
+
+All 14 books use 82 locally served WebP images generated with the built-in image tool, with a watercolor, gouache and colored-pencil direction. Each page has its own scene. These are AI-generated illustrations with a painted appearance, not commissioned human paintings. Optimized assets live in `illustrations/book-ID-PAGE.webp`; the earlier SVG versions are retained as source-history alternatives. Story text, book IDs and progress counts are unchanged.
+
+The original eight short stories now also have three painted illustrations each, with descriptive alternative text. Their published text, stable IDs, grade levels and cloud progress counts are preserved. All books now have illustrated library covers and a distinct picture on every page.
